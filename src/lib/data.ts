@@ -199,6 +199,134 @@ export function getMultipleCompression() {
   }[];
 }
 
+// Margin expansion: operating margin change from 2022 to latest
+export function getMarginExpansion() {
+  return tickers
+    .map((t) => {
+      const d2022 = data.find(
+        (d) => d.ticker === t && d.year === 2022 && d.operating_margin !== null
+      );
+      const latest = data
+        .filter((d) => d.ticker === t && d.operating_margin !== null)
+        .sort((a, b) => b.year - a.year)[0];
+      if (!d2022 || !latest || latest.year <= 2022) return null;
+      return {
+        ticker: t,
+        company: d2022.company,
+        sector: d2022.sector,
+        om_2022: d2022.operating_margin!,
+        om_latest: latest.operating_margin!,
+        latest_year: latest.year,
+        expansion: latest.operating_margin! - d2022.operating_margin!,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b!.expansion - a!.expansion) as {
+    ticker: string;
+    company: string;
+    sector: string;
+    om_2022: number;
+    om_latest: number;
+    latest_year: number;
+    expansion: number;
+  }[];
+}
+
+// "Never Deserved It" — peak EV/Rev vs stock return since 2020
+export function getNeverDeservedIt() {
+  const latestYear = getLatestYear();
+  return tickers
+    .map((t) => {
+      const peak =
+        data.find(
+          (d) => d.ticker === t && d.year === 2021 && d.ev_revenue !== null
+        ) ??
+        data.find(
+          (d) => d.ticker === t && d.year === 2022 && d.ev_revenue !== null
+        );
+      const latest = data.find(
+        (d) =>
+          d.ticker === t &&
+          d.year === latestYear &&
+          d.stock_return_since_2020 !== null
+      );
+      if (!peak || !latest) return null;
+      return {
+        ticker: t,
+        company: peak.company,
+        sector: peak.sector,
+        peak_ev_revenue: peak.ev_revenue!,
+        stock_return: latest.stock_return_since_2020!,
+      };
+    })
+    .filter(Boolean) as {
+    ticker: string;
+    company: string;
+    sector: string;
+    peak_ev_revenue: number;
+    stock_return: number;
+  }[];
+}
+
+// Sound bite stats auto-calculated from data
+export function getSoundBites() {
+  const latestYear = getLatestYear();
+
+  // Peak vs current median EV/Rev
+  const peakMedian = getOverallMedian(2021, "ev_revenue") ?? getOverallMedian(2022, "ev_revenue");
+  const currentMedian = getOverallMedian(latestYear, "ev_revenue");
+  const compressionPct =
+    peakMedian && currentMedian
+      ? Math.round(((currentMedian / peakMedian) - 1) * 100)
+      : null;
+
+  // Best performer
+  const latestData = data.filter(
+    (d) => d.year === latestYear && d.stock_return_since_2020 !== null
+  );
+  const bestStock = latestData.sort(
+    (a, b) =>
+      (b.stock_return_since_2020 ?? 0) - (a.stock_return_since_2020 ?? 0)
+  )[0];
+  const worstStock = latestData.sort(
+    (a, b) =>
+      (a.stock_return_since_2020 ?? 0) - (b.stock_return_since_2020 ?? 0)
+  )[0];
+
+  // Highest Rule of 40
+  const r40Data = data.filter(
+    (d) => d.year === latestYear && d.rule_of_40 !== null
+  );
+  const bestR40 = r40Data.sort(
+    (a, b) => (b.rule_of_40 ?? 0) - (a.rule_of_40 ?? 0)
+  )[0];
+
+  // Biggest single compression
+  const compressions = getMultipleCompression();
+  const biggestDrop = compressions[0];
+
+  // Margin expansion leader
+  const expansions = getMarginExpansion();
+  const marginLeader = expansions[0];
+
+  // Companies above rule of 40
+  const above40 = r40Data.filter((d) => (d.rule_of_40 ?? 0) >= 40).length;
+  const totalR40 = r40Data.length;
+
+  return {
+    peakMedian,
+    currentMedian,
+    compressionPct,
+    bestStock,
+    worstStock,
+    bestR40,
+    biggestDrop,
+    marginLeader,
+    above40,
+    totalR40,
+  };
+}
+
 // Stock return since 2020 rankings
 export function getStockReturnRankings() {
   const latestYear = getLatestYear();
