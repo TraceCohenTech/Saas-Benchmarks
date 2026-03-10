@@ -247,27 +247,29 @@ export default function Home() {
       </motion.header>
 
       {/* ═══ STICKY NAV ═══ */}
-      <div className="sticky top-0 z-50 bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center gap-4">
-          <nav className="flex gap-1 overflow-x-auto flex-1">
+      <div className="sticky top-0 z-50 bg-[#09090b]/95 backdrop-blur-lg border-b border-zinc-800/50">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+          <nav className="flex flex-wrap gap-1.5">
             {NAV_ITEMS.map((item) => (
-              <a key={item.id} href={`#${item.id}`} className="px-2.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-colors whitespace-nowrap">
+              <a key={item.id} href={`#${item.id}`} className="px-4 py-2 text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors whitespace-nowrap">
                 {item.label}
               </a>
             ))}
           </nav>
           <div className="flex gap-3 items-center">
             <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5">
+              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2">
               {years.filter((y) => data.some((d) => d.year === y && d.revenue !== null)).map((y) => (
                 <option key={y} value={y}>FY {y}</option>
               ))}
             </select>
             <select value={selectedSector} onChange={(e) => setSelectedSector(e.target.value)}
-              className="bg-zinc-900 border border-zinc-700 text-white text-xs rounded-lg px-3 py-1.5">
+              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2">
               <option value="All">All Sectors</option>
               {sectors.map((s) => (<option key={s} value={s}>{s}</option>))}
             </select>
+          </div>
           </div>
         </div>
       </div>
