@@ -233,7 +233,7 @@ export default function Home() {
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Benchmarks</span>
             </h1>
             <p className="text-zinc-400 mt-4 text-lg max-w-2xl leading-relaxed">
-              Financial dataset of {companiesCount}+ public tech companies across 8 sectors. Revenue, margins, valuation multiples, and efficiency metrics from 2018 to present.
+              Financial dataset of {companiesCount}+ public tech companies across 8 sectors. Revenue, margins, valuation multiples, and efficiency metrics from 2022 to present.
             </p>
           </motion.div>
         </div>
