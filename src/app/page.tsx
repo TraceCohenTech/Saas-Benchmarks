@@ -92,24 +92,10 @@ function heatmapColor(val: number | null): string {
   return "#3b82f6";
 }
 
-const NAV_ITEMS = [
-  { id: "takeaways", label: "Key Insights" },
-  { id: "overview", label: "Compression" },
-  { id: "ai-premium", label: "AI Premium" },
-  { id: "efficiency", label: "Efficiency" },
-  { id: "sectors", label: "Sectors" },
-  { id: "growth-vs-val", label: "Growth vs Val" },
-  { id: "rule-of-40", label: "Rule of 40" },
-  { id: "billion-club", label: "$1B Club" },
-  { id: "returns", label: "Returns" },
-  { id: "heatmap", label: "Heatmap" },
-  { id: "compare", label: "Compare" },
-  { id: "table", label: "Table" },
-];
 
 export default function Home() {
-  const [selectedYear, setSelectedYear] = useState(getLatestYear());
-  const [selectedSector, setSelectedSector] = useState<string>("All");
+  const selectedYear = getLatestYear();
+  const selectedSector = "All";
   const [comp1, setComp1] = useState("NVDA");
   const [comp2, setComp2] = useState("CRM");
   const [comp3, setComp3] = useState("CRWD");
@@ -245,34 +231,6 @@ export default function Home() {
           </div>
         </div>
       </motion.header>
-
-      {/* ═══ STICKY NAV ═══ */}
-      <div className="sticky top-0 z-50 bg-[#09090b]/95 backdrop-blur-lg border-b border-zinc-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-          <nav className="flex flex-wrap gap-1.5">
-            {NAV_ITEMS.map((item) => (
-              <a key={item.id} href={`#${item.id}`} className="px-4 py-2 text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors whitespace-nowrap">
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex gap-3 items-center">
-            <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2">
-              {years.filter((y) => data.some((d) => d.year === y && d.revenue !== null)).map((y) => (
-                <option key={y} value={y}>FY {y}</option>
-              ))}
-            </select>
-            <select value={selectedSector} onChange={(e) => setSelectedSector(e.target.value)}
-              className="bg-zinc-900 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2">
-              <option value="All">All Sectors</option>
-              {sectors.map((s) => (<option key={s} value={s}>{s}</option>))}
-            </select>
-          </div>
-          </div>
-        </div>
-      </div>
 
       <main className="max-w-7xl mx-auto px-6 py-12 space-y-20">
 
