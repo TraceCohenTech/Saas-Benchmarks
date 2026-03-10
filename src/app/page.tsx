@@ -669,7 +669,21 @@ export default function Home() {
 
         {/* ═══ 11: HEATMAP ═══ */}
         <Section id="heatmap" number="09" title="Valuation Heatmap"
-          description="Every company × every year. Cells colored by EV/Revenue multiple. Blue = cheap, yellow = moderate, red = expensive. The compression from 2021 to present is visible at a glance.">
+          description="Every company × every year. Cells colored by EV/Revenue multiple. Blue = cheap, yellow = moderate, red = expensive. Click any column header to sort.">
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-rose-500/10 to-rose-500/5 border border-rose-500/20 rounded-2xl p-4 sm:p-5">
+              <p className="text-rose-400 text-xs font-bold uppercase tracking-wider mb-2">The Great Compression</p>
+              <p className="text-white text-sm leading-relaxed">SaaS and Cloud got hit hardest. BILL dropped 78%, SentinelOne 74%, GitLab 73%. Cloud Infrastructure median fell from 14.4x to 8.0x — nearly cut in half.</p>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
+              <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Fintech & Consumer Expansion</p>
+              <p className="text-white text-sm leading-relaxed">The opposite story. Spotify went from 1.4x to 7.0x (+401%), Robinhood 4.7x to 20x (+322%), META tripled from 2.2x to 7.2x. Execution rewarded.</p>
+            </div>
+            <div className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20 rounded-2xl p-4 sm:p-5">
+              <p className="text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">Semis Became the New Premium</p>
+              <p className="text-white text-sm leading-relaxed">NVDA has been the most expensive company since 2023 (peaking at 54x). Semiconductors median went from 5.8x to 19.3x — a 3x expansion driven by AI.</p>
+            </div>
+          </div>
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 overflow-x-auto">
             {/* Legend */}
             <div className="flex items-center gap-4 mb-4 text-xs">
