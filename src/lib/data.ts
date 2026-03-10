@@ -485,13 +485,7 @@ export function getKeyTakeaways(): string[] {
     takeaways.push(`AI beneficiaries trade at a ${Math.round(premium)}% premium to non-AI companies (${aiPrem.aiMedianEvRev.toFixed(1)}x vs ${aiPrem.nonAiMedianEvRev.toFixed(1)}x).`);
   }
 
-  // 7. Billion club
-  const bClub = getBillionRevenueClub();
-  if (bClub.length > 0) {
-    takeaways.push(`${bClub.length} companies have crossed $1B in annual revenue. The fastest: ${bClub[0].ticker} (${bClub[0].years_to_billion} years from IPO).`);
-  }
-
-  // 8. Worst performer
+  // 7. Worst performer
   const worst = [...latestData].sort((a, b) => (a.stock_return_since_2020 ?? 0) - (b.stock_return_since_2020 ?? 0))[0];
   if (worst) {
     takeaways.push(`${worst.ticker} is the worst performer at ${worst.stock_return_since_2020?.toFixed(0)}% since 2020.`);

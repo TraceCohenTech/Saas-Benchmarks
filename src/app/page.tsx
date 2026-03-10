@@ -15,7 +15,7 @@ import {
   getRuleOf40Rankings, getMultipleCompression, getStockReturnRankings,
   getMarginExpansion, getSoundBites,
   getHeatmapData, getAIPremiumData, getAIvsNonAITimeSeries,
-  getBillionRevenueClub, getKeyTakeaways, getSectorBestInClass,
+  getKeyTakeaways, getSectorBestInClass,
   getCompanyTimeSeries, getCompanyDetails,
   formatBillions, formatPct, formatMultiple,
 } from "@/lib/data";
@@ -100,6 +100,7 @@ export default function Home() {
   const [comp2, setComp2] = useState("CRM");
   const [comp3, setComp3] = useState("CRWD");
   const [tableSearch, setTableSearch] = useState("");
+  const [heatmapSort, setHeatmapSort] = useState<{ field: "ticker" | number; dir: "asc" | "desc" }>({ field: "ticker", dir: "asc" });
 
   const latestYear = getLatestYear();
   const bites = getSoundBites();
@@ -140,9 +141,23 @@ export default function Home() {
   const heatmapData = getHeatmapData();
   const aiPremium = getAIPremiumData(selectedYear);
   const aiTimeSeries = getAIvsNonAITimeSeries();
-  const billionClub = getBillionRevenueClub();
   const bestInClass = getSectorBestInClass(selectedYear);
   const heatmapYears = years.filter((y) => y !== 2021 && y !== 2026 && data.some((d) => d.year === y && d.ev_revenue !== null));
+
+  const sortedHeatmapData = useMemo(() => {
+    const sorted = [...heatmapData];
+    if (heatmapSort.field === "ticker") {
+      sorted.sort((a, b) => heatmapSort.dir === "asc" ? a.ticker.localeCompare(b.ticker) : b.ticker.localeCompare(a.ticker));
+    } else {
+      const yr = heatmapSort.field;
+      sorted.sort((a, b) => {
+        const aV = a.years[yr] ?? -Infinity;
+        const bV = b.years[yr] ?? -Infinity;
+        return heatmapSort.dir === "desc" ? bV - aV : aV - bV;
+      });
+    }
+    return sorted;
+  }, [heatmapData, heatmapSort]);
 
   const sectorMetrics = sectors.map((s) => ({
     sector: s,
@@ -603,45 +618,8 @@ export default function Home() {
           </div>
         </Section>
 
-        {/* ═══ 08: $1B REVENUE CLUB ═══ */}
-        <Section id="billion-club" number="08" title="The $1B Revenue Club"
-          description="Companies that crossed $1 billion in annual revenue, ranked by how fast they got there from IPO. Speed to scale matters — it shows product-market fit and efficient go-to-market.">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            <Callout stat={`${billionClub.length}`} label="Companies in the $1B club" color="emerald" />
-            {billionClub[0] && <Callout stat={`${billionClub[0].years_to_billion} yrs`} label={`${billionClub[0].ticker} — fastest to $1B`} detail={`IPO ${billionClub[0].ipo_year} → $1B by ${billionClub[0].crossed_year}`} color="cyan" />}
-            {billionClub[billionClub.length - 1] && <Callout stat={`${billionClub[billionClub.length - 1].years_to_billion} yrs`} label={`${billionClub[billionClub.length - 1].ticker} — slowest to $1B`} color="amber" />}
-          </div>
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {billionClub.map((d, i) => (
-                <div key={d.ticker} className="relative bg-zinc-800/60 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-bold text-sm">{d.ticker}</span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${i < 5 ? "bg-teal-500/20 text-teal-400" : i < 15 ? "bg-blue-500/20 text-blue-400" : "bg-indigo-500/20 text-indigo-400"}`}>
-                      {d.years_to_billion}yr{d.years_to_billion !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <p className="text-zinc-400 text-xs truncate">{d.company}</p>
-                  <div className="mt-2 w-full bg-zinc-700/30 rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full transition-all" style={{
-                      width: `${Math.max(8, 100 - (d.years_to_billion / (billionClub[billionClub.length - 1]?.years_to_billion || 30)) * 100)}%`,
-                      backgroundColor: i < 5 ? "#14b8a6" : i < 15 ? "#0ea5e9" : "#6366f1",
-                    }} />
-                  </div>
-                  <p className="text-zinc-500 text-[10px] mt-1.5">IPO {d.ipo_year} → $1B by {d.crossed_year}</p>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-6 mt-4 justify-center text-xs">
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-teal-500" />Fastest (top 5)</div>
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500" />Fast (6-15)</div>
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-indigo-500" />Rest</div>
-            </div>
-          </div>
-        </Section>
-
-        {/* ═══ 10: STOCK RETURNS ═══ */}
-        <Section id="returns" number="09" title="The Scoreboard: Stock Performance"
+        {/* ═══ 08: STOCK RETURNS ═══ */}
+        <Section id="returns" number="08" title="The Scoreboard: Stock Performance"
           description="Total return from Jan 2020 to today. Captures the full pandemic cycle. The gap between winners and losers is staggering.">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Callout stat={`+${returns[0]?.return_since_2020.toFixed(0)}%`} label={`${returns[0]?.ticker} — #1`} color="emerald" />
@@ -690,7 +668,7 @@ export default function Home() {
         </Section>
 
         {/* ═══ 11: HEATMAP ═══ */}
-        <Section id="heatmap" number="10" title="Valuation Heatmap"
+        <Section id="heatmap" number="09" title="Valuation Heatmap"
           description="Every company × every year. Cells colored by EV/Revenue multiple. Blue = cheap, yellow = moderate, red = expensive. The compression from 2021 to present is visible at a glance.">
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
             {/* Legend */}
@@ -704,11 +682,17 @@ export default function Home() {
             </div>
             <table className="text-xs w-full">
               <thead><tr>
-                <th className="text-left py-2 px-2 text-zinc-400 sticky left-0 bg-zinc-900">Ticker</th>
-                {heatmapYears.map((y) => (<th key={y} className="text-center py-2 px-2 text-zinc-400">{y}</th>))}
+                <th className="text-left py-2 px-2 text-zinc-400 sticky left-0 bg-zinc-900 cursor-pointer hover:text-white transition-colors"
+                  onClick={() => setHeatmapSort(prev => prev.field === "ticker" ? { field: "ticker", dir: prev.dir === "asc" ? "desc" : "asc" } : { field: "ticker", dir: "asc" })}>
+                  Ticker {heatmapSort.field === "ticker" && <span>{heatmapSort.dir === "asc" ? "↑" : "↓"}</span>}
+                </th>
+                {heatmapYears.map((y) => (<th key={y} className="text-center py-2 px-2 text-zinc-400 cursor-pointer hover:text-white transition-colors"
+                  onClick={() => setHeatmapSort(prev => prev.field === y ? { field: y, dir: prev.dir === "desc" ? "asc" : "desc" } : { field: y, dir: "desc" })}>
+                  {y} {heatmapSort.field === y && <span>{heatmapSort.dir === "desc" ? "↓" : "↑"}</span>}
+                </th>))}
               </tr></thead>
               <tbody>
-                {heatmapData.map((row) => (
+                {sortedHeatmapData.map((row) => (
                   <tr key={row.ticker} className="hover:bg-zinc-800/20">
                     <td className="py-1 px-2 text-white font-medium sticky left-0 bg-zinc-900/90">{row.ticker}</td>
                     {heatmapYears.map((y) => {
@@ -732,7 +716,7 @@ export default function Home() {
         </Section>
 
         {/* ═══ 12: COMPANY COMPARISON ═══ */}
-        <Section id="compare" number="11" title="Company Comparison"
+        <Section id="compare" number="10" title="Company Comparison"
           description="Select up to 3 companies to compare side-by-side. See how their valuations tracked over time and how their fundamentals stack up.">
           <div className="flex flex-wrap gap-4 mb-6">
             {[{ val: comp1, set: setComp1, color: COMPARE_COLORS[0] },
@@ -795,7 +779,7 @@ export default function Home() {
         </Section>
 
         {/* ═══ 13: FULL TABLE ═══ */}
-        <Section id="table" number="12" title="Full Company Dataset"
+        <Section id="table" number="11" title="Full Company Dataset"
           description={`Every company for FY${selectedYear}. Search and sort the raw data.`}>
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
             <div className="flex flex-wrap items-center gap-4 mb-4">
