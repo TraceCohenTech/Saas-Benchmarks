@@ -327,6 +327,232 @@ export function getSoundBites() {
   };
 }
 
+// Helper: compute median of a numeric array
+function median(arr: number[]): number | null {
+  if (arr.length === 0) return null;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+// AI Beneficiaries list
+export const AI_TICKERS = [
+  "NVDA", "AMD", "AVGO", "ARM", "SMCI", "CRWD", "DDOG", "SNOW", "NET",
+  "MDB", "PANW", "ZS", "NOW", "MSFT", "GOOGL", "META", "CFLT",
+];
+
+// Heatmap: Company x Year grid for EV/Revenue
+export function getHeatmapData(): {
+  ticker: string;
+  company: string;
+  sector: string;
+  years: Record<number, number | null>;
+}[] {
+  const companiesWithEvRev = Array.from(
+    new Set(data.filter((d) => d.ev_revenue !== null).map((d) => d.ticker))
+  ).sort();
+  return companiesWithEvRev.map((t) => {
+    const rows = data.filter((d) => d.ticker === t);
+    const yearMap: Record<number, number | null> = {};
+    years.forEach((y) => {
+      const row = rows.find((d) => d.year === y);
+      yearMap[y] = row?.ev_revenue ?? null;
+    });
+    const firstRow = rows[0];
+    return {
+      ticker: t,
+      company: firstRow?.company ?? t,
+      sector: firstRow?.sector ?? "",
+      years: yearMap,
+    };
+  });
+}
+
+// AI Premium comparison
+export function getAIPremiumData(year: number) {
+  const yearData = data.filter((d) => d.year === year);
+  const aiData = yearData.filter((d) => AI_TICKERS.includes(d.ticker));
+  const nonAiData = yearData.filter((d) => !AI_TICKERS.includes(d.ticker));
+
+  const aiEvRevVals = aiData.filter((d) => d.ev_revenue !== null).map((d) => d.ev_revenue!);
+  const nonAiEvRevVals = nonAiData.filter((d) => d.ev_revenue !== null).map((d) => d.ev_revenue!);
+  const aiReturnVals = aiData.filter((d) => d.stock_return_since_2020 !== null).map((d) => d.stock_return_since_2020!);
+  const nonAiReturnVals = nonAiData.filter((d) => d.stock_return_since_2020 !== null).map((d) => d.stock_return_since_2020!);
+
+  return {
+    aiMedianEvRev: median(aiEvRevVals),
+    nonAiMedianEvRev: median(nonAiEvRevVals),
+    aiMedianReturn: median(aiReturnVals),
+    nonAiMedianReturn: median(nonAiReturnVals),
+    aiCount: aiData.filter((d) => d.revenue !== null).length,
+    nonAiCount: nonAiData.filter((d) => d.revenue !== null).length,
+  };
+}
+
+// AI vs Non-AI time series for comparison
+export function getAIvsNonAITimeSeries() {
+  return years
+    .map((y) => {
+      const yearData = data.filter((d) => d.year === y && d.ev_revenue !== null);
+      const aiVals = yearData.filter((d) => AI_TICKERS.includes(d.ticker)).map((d) => d.ev_revenue!);
+      const nonAiVals = yearData.filter((d) => !AI_TICKERS.includes(d.ticker)).map((d) => d.ev_revenue!);
+      const aiMed = median(aiVals);
+      const nonAiMed = median(nonAiVals);
+      if (aiMed === null && nonAiMed === null) return null;
+      return { year: y, ai: aiMed, nonAi: nonAiMed };
+    })
+    .filter(Boolean) as { year: number; ai: number | null; nonAi: number | null }[];
+}
+
+// $1B Revenue Club
+export function getBillionRevenueClub() {
+  const tickerList = Array.from(new Set(data.map((d) => d.ticker)));
+  return tickerList
+    .map((t) => {
+      const rows = data.filter((d) => d.ticker === t && d.revenue !== null).sort((a, b) => a.year - b.year);
+      const crossedRow = rows.find((d) => (d.revenue ?? 0) >= 1e9);
+      if (!crossedRow) return null;
+      const ipoYear = crossedRow.ipo_year;
+      const yearsCrossed = crossedRow.year;
+      const yearsToB = yearsCrossed - ipoYear;
+      return {
+        ticker: t,
+        company: crossedRow.company,
+        sector: crossedRow.sector,
+        ipo_year: ipoYear,
+        crossed_year: yearsCrossed,
+        years_to_billion: yearsToB,
+        revenue_at_crossing: crossedRow.revenue!,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a!.years_to_billion - b!.years_to_billion) as {
+    ticker: string;
+    company: string;
+    sector: string;
+    ipo_year: number;
+    crossed_year: number;
+    years_to_billion: number;
+    revenue_at_crossing: number;
+  }[];
+}
+
+// Key Takeaways auto-generated
+export function getKeyTakeaways(): string[] {
+  const latestYear = getLatestYear();
+  const takeaways: string[] = [];
+
+  // 1. Median compression
+  const peakMed = getOverallMedian(2021, "ev_revenue");
+  const currMed = getOverallMedian(latestYear, "ev_revenue");
+  if (peakMed && currMed) {
+    const pct = Math.abs(Math.round(((currMed / peakMed) - 1) * 100));
+    takeaways.push(`The median SaaS multiple compressed ${pct}% from ${peakMed.toFixed(1)}x in 2021 to ${currMed.toFixed(1)}x today.`);
+  }
+
+  // 2. Best performer
+  const latestData = data.filter((d) => d.year === latestYear && d.stock_return_since_2020 !== null);
+  const best = [...latestData].sort((a, b) => (b.stock_return_since_2020 ?? 0) - (a.stock_return_since_2020 ?? 0))[0];
+  if (best) {
+    takeaways.push(`${best.ticker} is up ${best.stock_return_since_2020?.toFixed(0)}% since 2020 — the best performer in the dataset.`);
+  }
+
+  // 3. Rule of 40 comparison
+  const r40Now = data.filter((d) => d.year === latestYear && d.rule_of_40 !== null);
+  const above40Now = r40Now.filter((d) => (d.rule_of_40 ?? 0) >= 40).length;
+  const r40Then = data.filter((d) => d.year === 2022 && d.rule_of_40 !== null);
+  const above40Then = r40Then.filter((d) => (d.rule_of_40 ?? 0) >= 40).length;
+  takeaways.push(`${above40Now} companies now pass the Rule of 40, up from ${above40Then} in 2022.`);
+
+  // 4. Highest sector median
+  const sectorMeds = sectors.map((s) => ({
+    sector: s,
+    med: getSectorMedian(s, latestYear, "ev_revenue"),
+  })).filter((s) => s.med !== null).sort((a, b) => (b.med ?? 0) - (a.med ?? 0));
+  if (sectorMeds[0]) {
+    takeaways.push(`${sectorMeds[0].sector} commands the highest median multiple at ${sectorMeds[0].med?.toFixed(1)}x.`);
+  }
+
+  // 5. Unprofitable to profitable
+  const marginExp = getMarginExpansion();
+  const flipped = marginExp.filter((d) => d.om_latest > 0 && d.om_2022 < 0).length;
+  takeaways.push(`${flipped} companies went from unprofitable to profitable since 2022.`);
+
+  // 6. AI premium
+  const aiPrem = getAIPremiumData(latestYear);
+  if (aiPrem.aiMedianEvRev && aiPrem.nonAiMedianEvRev) {
+    const premium = ((aiPrem.aiMedianEvRev / aiPrem.nonAiMedianEvRev) - 1) * 100;
+    takeaways.push(`AI beneficiaries trade at a ${Math.round(premium)}% premium to non-AI companies (${aiPrem.aiMedianEvRev.toFixed(1)}x vs ${aiPrem.nonAiMedianEvRev.toFixed(1)}x).`);
+  }
+
+  // 7. Billion club
+  const bClub = getBillionRevenueClub();
+  if (bClub.length > 0) {
+    takeaways.push(`${bClub.length} companies have crossed $1B in annual revenue. The fastest: ${bClub[0].ticker} (${bClub[0].years_to_billion} years from IPO).`);
+  }
+
+  // 8. Worst performer
+  const worst = [...latestData].sort((a, b) => (a.stock_return_since_2020 ?? 0) - (b.stock_return_since_2020 ?? 0))[0];
+  if (worst) {
+    takeaways.push(`${worst.ticker} is the worst performer at ${worst.stock_return_since_2020?.toFixed(0)}% since 2020.`);
+  }
+
+  return takeaways;
+}
+
+// Sector Best in Class
+export function getSectorBestInClass(year: number) {
+  return sectors.map((s) => {
+    const sectorData = data.filter((d) => d.sector === s && d.year === year && d.revenue !== null);
+    const bestEvRev = [...sectorData].filter((d) => d.ev_revenue !== null).sort((a, b) => (b.ev_revenue ?? 0) - (a.ev_revenue ?? 0))[0];
+    const bestGrowth = [...sectorData].filter((d) => d.revenue_growth !== null).sort((a, b) => (b.revenue_growth ?? 0) - (a.revenue_growth ?? 0))[0];
+    const bestR40 = [...sectorData].filter((d) => d.rule_of_40 !== null).sort((a, b) => (b.rule_of_40 ?? 0) - (a.rule_of_40 ?? 0))[0];
+    const bestMargin = [...sectorData].filter((d) => d.operating_margin !== null).sort((a, b) => (b.operating_margin ?? 0) - (a.operating_margin ?? 0))[0];
+    return {
+      sector: s,
+      bestEvRev: bestEvRev ? { ticker: bestEvRev.ticker, value: bestEvRev.ev_revenue! } : null,
+      bestGrowth: bestGrowth ? { ticker: bestGrowth.ticker, value: bestGrowth.revenue_growth! } : null,
+      bestR40: bestR40 ? { ticker: bestR40.ticker, value: bestR40.rule_of_40! } : null,
+      bestMargin: bestMargin ? { ticker: bestMargin.ticker, value: bestMargin.operating_margin! } : null,
+    };
+  });
+}
+
+// Company comparison data
+export function getCompanyTimeSeries(ticker: string) {
+  return data
+    .filter((d) => d.ticker === ticker && d.ev_revenue !== null)
+    .sort((a, b) => a.year - b.year)
+    .map((d) => ({
+      year: d.year,
+      ev_revenue: d.ev_revenue!,
+    }));
+}
+
+export function getCompanyDetails(ticker: string, year: number) {
+  return data.find((d) => d.ticker === ticker && d.year === year) ?? null;
+}
+
+// CSV export
+export function generateCSV(): string {
+  const headers = [
+    "company", "ticker", "sector", "year", "ipo_year",
+    "revenue", "revenue_growth", "gross_margin", "operating_margin",
+    "net_margin", "fcf_margin", "ev_revenue", "ev_ebitda", "pe",
+    "rule_of_40", "stock_return_since_2020", "market_cap", "enterprise_value",
+  ];
+  const rows = data.map((d) =>
+    headers.map((h) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const val = (d as any)[h];
+      if (val === null || val === undefined) return "";
+      if (typeof val === "string") return `"${val.replace(/"/g, '""')}"`;
+      return String(val);
+    }).join(",")
+  );
+  return [headers.join(","), ...rows].join("\n");
+}
+
 // Stock return since 2020 rankings
 export function getStockReturnRankings() {
   const latestYear = getLatestYear();
