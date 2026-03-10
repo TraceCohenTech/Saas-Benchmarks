@@ -33,11 +33,11 @@ export default function AnimatedKPI({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border border-zinc-700/50 rounded-2xl p-5 backdrop-blur-sm text-center"
+      className="bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border border-zinc-700/50 rounded-2xl p-3 sm:p-5 backdrop-blur-sm text-center"
     >
-      <p className="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-2">{label}</p>
+      <p className="text-[10px] sm:text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1 sm:mb-2">{label}</p>
       <div className="flex items-baseline justify-center gap-2">
-        <span className="text-3xl font-extrabold text-white tracking-tight">
+        <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           {prefix}
           <CountUp
             end={value}

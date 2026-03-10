@@ -42,7 +42,7 @@ function Section({ id, number, title, description, children }: {
           <span className="text-xs font-bold tracking-widest uppercase text-blue-400">{number}</span>
           <div className="h-px flex-1 bg-zinc-800" />
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{title}</h2>
         <p className="text-zinc-400 mt-1 max-w-3xl text-sm leading-relaxed">{description}</p>
       </div>
       {children}
@@ -63,8 +63,8 @@ function Callout({ stat, label, detail, color = "cyan", delay = 0 }: {
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }} transition={{ duration: 0.4, delay }}
-      className={`bg-gradient-to-br ${cm[color]} border rounded-2xl p-5`}>
-      <p className={`text-3xl font-extrabold tracking-tight`}>{stat}</p>
+      className={`bg-gradient-to-br ${cm[color]} border rounded-2xl p-3 sm:p-5`}>
+      <p className={`text-xl sm:text-3xl font-extrabold tracking-tight`}>{stat}</p>
       <p className="text-white font-semibold text-sm mt-1">{label}</p>
       {detail && <p className="text-zinc-500 text-xs mt-1">{detail}</p>}
     </motion.div>
@@ -225,10 +225,10 @@ export default function Home() {
         className="relative overflow-hidden border-b border-zinc-800">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-950/40 via-transparent to-cyan-950/30" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="relative max-w-7xl mx-auto px-6 pt-16 pb-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-10 sm:pb-12">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <p className="text-blue-400 text-sm font-semibold tracking-widest uppercase mb-3">Public Market Intelligence</p>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
               SaaS Valuation<br />
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Benchmarks</span>
             </h1>
@@ -239,7 +239,7 @@ export default function Home() {
         </div>
       </motion.header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-14 sm:space-y-20">
 
         {/* ═══ KEY TAKEAWAYS ═══ */}
         <Section id="takeaways" number="00" title="Key Takeaways"
@@ -279,7 +279,7 @@ export default function Home() {
         {/* ═══ 01: COMPRESSION STORY ═══ */}
         <Section id="overview" number="01" title="The Valuation Compression Story"
           description="Median EV/Revenue multiple across all 73 companies. Key market events annotated. The ZIRP era inflated multiples to historic highs — rate hikes brought them crashing back.">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={overallTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -307,7 +307,7 @@ export default function Home() {
         {/* ═══ 02: SECTOR COMPRESSION LINES ═══ */}
         <Section id="compression" number="02" title="Compression by Sector"
           description="Not all sectors compressed equally. Each line shows the median EV/Revenue for companies in that sector.">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={420}>
               <LineChart data={evRevTimeSeries}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -325,7 +325,7 @@ export default function Home() {
             </ResponsiveContainer>
           </div>
           <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Biggest Losers</h3>
               <p className="text-xs text-zinc-500 mb-4">Steepest decline from peak EV/Revenue</p>
               <ResponsiveContainer width="100%" height={360}>
@@ -347,7 +347,7 @@ export default function Home() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Beat the Compression</h3>
               <p className="text-xs text-zinc-500 mb-4">Companies that expanded multiples</p>
               <ResponsiveContainer width="100%" height={360}>
@@ -384,7 +384,7 @@ export default function Home() {
               ? `+${(aiPremium.aiMedianReturn - aiPremium.nonAiMedianReturn).toFixed(0)}pp`
               : "—"} label="Return gap since 2020" detail="AI vs Non-AI median stock return" color="amber" />
           </div>
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-white mb-4">AI vs Non-AI Median EV/Revenue Over Time</h3>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={aiTimeSeries}>
@@ -406,7 +406,7 @@ export default function Home() {
         <Section id="efficiency" number="04" title="The Efficiency Era"
           description="Post-2022, the market stopped rewarding growth at all costs. These companies expanded operating margins the most — many going from deeply negative to profitable.">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Biggest Margin Improvers</h3>
               <p className="text-xs text-zinc-500 mb-4">Op margin change from FY2022 to latest</p>
               <ResponsiveContainer width="100%" height={450}>
@@ -460,7 +460,7 @@ export default function Home() {
         <Section id="sectors" number="05" title="Sector Benchmarks"
           description={`Median metrics by sector for FY${selectedYear}. Use these to benchmark private companies against public comps.`}>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Median EV / Revenue</h3>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={sectorMetrics} layout="vertical">
@@ -474,7 +474,7 @@ export default function Home() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Median Revenue Growth</h3>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={sectorMetrics} layout="vertical">
@@ -512,7 +512,7 @@ export default function Home() {
           </div>
 
           {/* Sector table */}
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 mt-6 overflow-x-auto">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 mt-6 overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="text-zinc-400 border-b border-zinc-800">
                 <th className="text-left py-3 px-3">Sector</th><th className="text-right py-3 px-3">Cos.</th>
@@ -542,8 +542,8 @@ export default function Home() {
         {/* ═══ 06: GROWTH VS VALUATION ═══ */}
         <Section id="growth-vs-val" number="06" title="Growth vs Valuation"
           description="Does the market reward growth? Each dot is a company. Upper-right = high-growth + expensive. Lower-left = slow-growth + cheap. Upper-left outliers may be overvalued.">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
-            <ResponsiveContainer width="100%" height={500}>
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+            <ResponsiveContainer width="100%" height={350}>
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                 <XAxis type="number" dataKey="revenue_growth" stroke="#71717a" tickFormatter={(v) => `${v}%`}
@@ -575,7 +575,7 @@ export default function Home() {
         <Section id="rule-of-40" number="07" title="Rule of 40 Rankings"
           description="Revenue Growth % + FCF Margin %. Above 40 = efficient growth. The best companies score 60+. This separates real businesses from 'growth at all costs' stories.">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Top 15 — Elite</h3>
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={r40Rankings.slice(0, 15)} layout="vertical">
@@ -595,7 +595,7 @@ export default function Home() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Bottom 15 — Red Flags</h3>
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={r40Rankings.filter(d => d.ticker !== "SOFI").slice(-15).reverse()} layout="vertical">
@@ -628,7 +628,7 @@ export default function Home() {
             <Callout stat={`${Math.round(returns.reduce((s, d) => s + d.return_since_2020, 0) / returns.length)}%`} label="Average return" color="blue" />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Best 15</h3>
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={returns.slice(0, 15)} layout="vertical">
@@ -645,7 +645,7 @@ export default function Home() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Worst 15</h3>
               <ResponsiveContainer width="100%" height={450}>
                 <BarChart data={returns.slice(-15).reverse()} layout="vertical">
@@ -670,7 +670,7 @@ export default function Home() {
         {/* ═══ 11: HEATMAP ═══ */}
         <Section id="heatmap" number="09" title="Valuation Heatmap"
           description="Every company × every year. Cells colored by EV/Revenue multiple. Blue = cheap, yellow = moderate, red = expensive. The compression from 2021 to present is visible at a glance.">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 overflow-x-auto">
             {/* Legend */}
             <div className="flex items-center gap-4 mb-4 text-xs">
               <span className="text-zinc-400">EV/Revenue:</span>
@@ -731,7 +731,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-white mb-4">EV/Revenue Over Time</h3>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={compTimeSeries}>
@@ -748,7 +748,7 @@ export default function Home() {
             </ResponsiveContainer>
           </div>
           {/* Comparison table */}
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 mt-6 overflow-x-auto">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 mt-6 overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="text-zinc-400 border-b border-zinc-800">
                 <th className="text-left py-3 px-3">Metric</th>
@@ -781,7 +781,7 @@ export default function Home() {
         {/* ═══ 13: FULL TABLE ═══ */}
         <Section id="table" number="11" title="Full Company Dataset"
           description={`Every company for FY${selectedYear}. Search and sort the raw data.`}>
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 sm:p-6 overflow-x-auto">
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <input type="text" placeholder="Search ticker or company..." value={tableSearch}
                 onChange={(e) => setTableSearch(e.target.value)}
