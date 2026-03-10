@@ -221,14 +221,6 @@ export default function Home() {
               Financial dataset of {companiesCount}+ public tech companies across 8 sectors. Revenue, margins, valuation multiples, and efficiency metrics from 2018 to present.
             </p>
           </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-10">
-            <AnimatedKPI label="Median EV / Revenue" value={medianEvRev ?? 0} suffix="x" decimals={1} delta={evRevDelta} deltaLabel="YoY" delay={0.3} />
-            <AnimatedKPI label="Median Revenue Growth" value={medianGrowth ?? 0} suffix="%" decimals={1} delay={0.4} />
-            <AnimatedKPI label="Median Rule of 40" value={medianR40 ?? 0} decimals={1} delay={0.5} />
-            <AnimatedKPI label="Median Op. Margin" value={medianOpMargin ?? 0} suffix="%" decimals={1} delay={0.6} />
-            <AnimatedKPI label="Median FCF Margin" value={medianFcfMargin ?? 0} suffix="%" decimals={1} delay={0.7} />
-            <AnimatedKPI label="Companies Tracked" value={companiesCount} decimals={0} delay={0.8} />
-          </div>
         </div>
       </motion.header>
 
@@ -246,6 +238,14 @@ export default function Home() {
                 <p className="text-zinc-300 text-sm leading-relaxed">{t}</p>
               </motion.div>
             ))}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-8">
+            <AnimatedKPI label="Median EV / Revenue" value={medianEvRev ?? 0} suffix="x" decimals={1} delta={evRevDelta} deltaLabel="YoY" delay={0.1} />
+            <AnimatedKPI label="Median Revenue Growth" value={medianGrowth ?? 0} suffix="%" decimals={1} delay={0.15} />
+            <AnimatedKPI label="Median Rule of 40" value={medianR40 ?? 0} decimals={1} delay={0.2} />
+            <AnimatedKPI label="Median Op. Margin" value={medianOpMargin ?? 0} suffix="%" decimals={1} delay={0.25} />
+            <AnimatedKPI label="Median FCF Margin" value={medianFcfMargin ?? 0} suffix="%" decimals={1} delay={0.3} />
+            <AnimatedKPI label="Companies Tracked" value={companiesCount} decimals={0} delay={0.35} />
           </div>
         </Section>
 

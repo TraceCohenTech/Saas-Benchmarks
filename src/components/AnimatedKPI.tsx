@@ -30,13 +30,14 @@ export default function AnimatedKPI({
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 backdrop-blur-sm"
+      className="bg-gradient-to-b from-zinc-800/80 to-zinc-900/80 border border-zinc-700/50 rounded-2xl p-5 backdrop-blur-sm text-center"
     >
-      <p className="text-sm text-zinc-400 font-medium mb-1">{label}</p>
-      <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-white tracking-tight">
+      <p className="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-2">{label}</p>
+      <div className="flex items-baseline justify-center gap-2">
+        <span className="text-3xl font-extrabold text-white tracking-tight">
           {prefix}
           <CountUp
             end={value}
@@ -47,24 +48,25 @@ export default function AnimatedKPI({
           />
           {suffix}
         </span>
-        {delta !== null && delta !== undefined && (
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: delay + 1.5 }}
-            className={`text-sm font-semibold ${
-              isPositive
-                ? "text-emerald-400"
-                : isNegative
-                ? "text-red-400"
-                : "text-zinc-400"
-            }`}
-          >
-            {isPositive ? "+" : ""}
-            {delta.toFixed(1)}%{deltaLabel ? ` ${deltaLabel}` : ""}
-          </motion.span>
-        )}
       </div>
+      {delta !== null && delta !== undefined && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: delay + 1.5 }}
+          className={`text-sm font-semibold mt-1.5 ${
+            isPositive
+              ? "text-emerald-400"
+              : isNegative
+              ? "text-red-400"
+              : "text-zinc-400"
+          }`}
+        >
+          {isPositive ? "+" : ""}
+          {delta.toFixed(1)}%{deltaLabel ? ` ${deltaLabel}` : ""}
+        </motion.p>
+      )}
     </motion.div>
   );
 }
