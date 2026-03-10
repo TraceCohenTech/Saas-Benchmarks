@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   LineChart, Line, BarChart, Bar, ScatterChart, Scatter,
@@ -13,10 +13,10 @@ import {
   getLatestYear, getOverallMedian, getSectorMedian,
   getSectorEvRevenueTimeSeries, getGrowthVsValuation,
   getRuleOf40Rankings, getMultipleCompression, getStockReturnRankings,
-  getMarginExpansion, getNeverDeservedIt, getSoundBites,
+  getMarginExpansion, getSoundBites,
   getHeatmapData, getAIPremiumData, getAIvsNonAITimeSeries,
   getBillionRevenueClub, getKeyTakeaways, getSectorBestInClass,
-  getCompanyTimeSeries, getCompanyDetails, generateCSV,
+  getCompanyTimeSeries, getCompanyDetails,
   formatBillions, formatPct, formatMultiple,
 } from "@/lib/data";
 
@@ -99,7 +99,6 @@ const NAV_ITEMS = [
   { id: "efficiency", label: "Efficiency" },
   { id: "sectors", label: "Sectors" },
   { id: "growth-vs-val", label: "Growth vs Val" },
-  { id: "never-deserved", label: "Deserved It?" },
   { id: "rule-of-40", label: "Rule of 40" },
   { id: "billion-club", label: "$1B Club" },
   { id: "returns", label: "Returns" },
@@ -151,14 +150,13 @@ export default function Home() {
   }, [selectedSector]);
 
   const marginExpansion = getMarginExpansion();
-  const neverDeserved = getNeverDeservedIt();
   const returns = getStockReturnRankings();
   const heatmapData = getHeatmapData();
   const aiPremium = getAIPremiumData(selectedYear);
   const aiTimeSeries = getAIvsNonAITimeSeries();
   const billionClub = getBillionRevenueClub();
   const bestInClass = getSectorBestInClass(selectedYear);
-  const heatmapYears = years.filter((y) => data.some((d) => d.year === y && d.ev_revenue !== null));
+  const heatmapYears = years.filter((y) => y !== 2021 && y !== 2026 && data.some((d) => d.year === y && d.ev_revenue !== null));
 
   const sectorMetrics = sectors.map((s) => ({
     sector: s,
@@ -218,14 +216,6 @@ export default function Home() {
     </th>
   );
 
-  const downloadCSV = useCallback(() => {
-    const csv = generateCSV();
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "saas_valuation_benchmarks.csv"; a.click();
-    URL.revokeObjectURL(url);
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#09090b]">
@@ -606,65 +596,8 @@ export default function Home() {
           </div>
         </Section>
 
-        {/* ═══ 07: NEVER DESERVED IT ═══ */}
-        <Section id="never-deserved" number="07" title={`"Never Deserved It" Quadrant`}
-          description="Peak EV/Revenue (2021-22) vs stock return since 2020. Bottom-right = sky-high multiples + destroyed value. Top-left = cheap entry + great returns.">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
-            <ResponsiveContainer width="100%" height={500}>
-              <ScatterChart>
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                <XAxis type="number" dataKey="peak_ev_revenue" stroke="#71717a" tickFormatter={(v) => `${v}x`}
-                  label={{ value: "Peak EV/Revenue (2021-22)", position: "insideBottom", offset: -5, fill: "#71717a", fontSize: 12 }} />
-                <YAxis type="number" dataKey="stock_return" stroke="#71717a" tickFormatter={(v) => `${v}%`}
-                  label={{ value: "Stock Return Since 2020", angle: -90, position: "insideLeft", fill: "#71717a", fontSize: 12 }} />
-                <ReferenceLine y={0} stroke="#71717a" strokeDasharray="3 3" />
-                <ReferenceLine x={20} stroke="#71717a" strokeDasharray="3 3" />
-                <Tooltip content={({ payload }) => {
-                  if (!payload?.[0]) return null; const d = payload[0].payload;
-                  const v = d.peak_ev_revenue > 20 && d.stock_return < 0 ? "Never deserved it" : d.peak_ev_revenue < 15 && d.stock_return > 100 ? "Hidden gem" : "Other";
-                  return (<div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm">
-                    <p className="text-white font-semibold">{d.ticker} — {d.company}</p>
-                    <p className="text-zinc-300 mt-1">Peak: {d.peak_ev_revenue.toFixed(1)}x · Return: {d.stock_return >= 0 ? "+" : ""}{d.stock_return.toFixed(0)}%</p>
-                    <p className="text-amber-400 text-xs mt-1">{v}</p>
-                  </div>);
-                }} />
-                <Scatter data={neverDeserved}>
-                  {neverDeserved.map((d, i) => (<Cell key={i}
-                    fill={d.peak_ev_revenue > 20 && d.stock_return < 0 ? "#e11d48" : d.peak_ev_revenue < 15 && d.stock_return > 100 ? "#22d3ee" : SECTOR_COLORS[d.sector] || "#888"}
-                    fillOpacity={0.85} r={7} />))}
-                </Scatter>
-              </ScatterChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap gap-6 mt-4 justify-center text-xs">
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-rose-600" /> Never deserved it</div>
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-cyan-400" /> Hidden gems</div>
-              <div className="flex items-center gap-2 text-zinc-500">Others by sector</div>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4 mt-6">
-            <div className="bg-gradient-to-br from-rose-500/5 to-rose-500/10 border border-rose-500/20 rounded-2xl p-5">
-              <h4 className="text-sm font-bold text-rose-400 mb-3 uppercase tracking-wider">Never Deserved It</h4>
-              <div className="space-y-2">{neverDeserved.filter(d => d.peak_ev_revenue > 20 && d.stock_return < 0).sort((a, b) => a.stock_return - b.stock_return).slice(0, 8).map(d => (
-                <div key={d.ticker} className="flex justify-between text-sm">
-                  <span><span className="text-white font-medium">{d.ticker}</span><span className="text-zinc-500 text-xs ml-2">Peak: {d.peak_ev_revenue.toFixed(0)}x</span></span>
-                  <span className="text-rose-400 font-medium">{d.stock_return.toFixed(0)}%</span>
-                </div>
-              ))}</div>
-            </div>
-            <div className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20 rounded-2xl p-5">
-              <h4 className="text-sm font-bold text-cyan-400 mb-3 uppercase tracking-wider">Hidden Gems</h4>
-              <div className="space-y-2">{neverDeserved.filter(d => d.peak_ev_revenue < 15 && d.stock_return > 100).sort((a, b) => b.stock_return - a.stock_return).slice(0, 8).map(d => (
-                <div key={d.ticker} className="flex justify-between text-sm">
-                  <span><span className="text-white font-medium">{d.ticker}</span><span className="text-zinc-500 text-xs ml-2">Peak: {d.peak_ev_revenue.toFixed(0)}x</span></span>
-                  <span className="text-cyan-400 font-medium">+{d.stock_return.toFixed(0)}%</span>
-                </div>
-              ))}</div>
-            </div>
-          </div>
-        </Section>
-
-        {/* ═══ 08: RULE OF 40 ═══ */}
-        <Section id="rule-of-40" number="08" title="Rule of 40 Rankings"
+        {/* ═══ 07: RULE OF 40 ═══ */}
+        <Section id="rule-of-40" number="07" title="Rule of 40 Rankings"
           description="Revenue Growth % + FCF Margin %. Above 40 = efficient growth. The best companies score 60+. This separates real businesses from 'growth at all costs' stories.">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
@@ -690,7 +623,7 @@ export default function Home() {
             <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-white mb-1">Bottom 15 — Red Flags</h3>
               <ResponsiveContainer width="100%" height={450}>
-                <BarChart data={r40Rankings.slice(-15).reverse()} layout="vertical">
+                <BarChart data={r40Rankings.filter(d => d.ticker !== "SOFI").slice(-15).reverse()} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" /><XAxis type="number" stroke="#71717a" />
                   <YAxis type="category" dataKey="ticker" stroke="#71717a" width={55} tick={{ fontSize: 11 }} />
                   <Tooltip contentStyle={tooltipStyle} content={({ payload }) => {
@@ -702,7 +635,7 @@ export default function Home() {
                   }} />
                   <ReferenceLine x={40} stroke="#fbbf24" strokeDasharray="4 4" />
                   <Bar dataKey="rule_of_40" radius={[0, 6, 6, 0]}>
-                    {r40Rankings.slice(-15).reverse().map((d) => (<Cell key={d.ticker} fill={d.rule_of_40 >= 40 ? "#10b981" : d.rule_of_40 >= 20 ? "#f59e0b" : "#ef4444"} />))}
+                    {r40Rankings.filter(d => d.ticker !== "SOFI").slice(-15).reverse().map((d) => (<Cell key={d.ticker} fill={d.rule_of_40 >= 40 ? "#10b981" : d.rule_of_40 >= 20 ? "#f59e0b" : "#ef4444"} />))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -710,8 +643,8 @@ export default function Home() {
           </div>
         </Section>
 
-        {/* ═══ 09: $1B REVENUE CLUB ═══ */}
-        <Section id="billion-club" number="09" title="The $1B Revenue Club"
+        {/* ═══ 08: $1B REVENUE CLUB ═══ */}
+        <Section id="billion-club" number="08" title="The $1B Revenue Club"
           description="Companies that crossed $1 billion in annual revenue, ranked by how fast they got there from IPO. Speed to scale matters — it shows product-market fit and efficient go-to-market.">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <Callout stat={`${billionClub.length}`} label="Companies in the $1B club" color="emerald" />
@@ -719,29 +652,36 @@ export default function Home() {
             {billionClub[billionClub.length - 1] && <Callout stat={`${billionClub[billionClub.length - 1].years_to_billion} yrs`} label={`${billionClub[billionClub.length - 1].ticker} — slowest to $1B`} color="amber" />}
           </div>
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
-            <ResponsiveContainer width="100%" height={Math.max(400, billionClub.length * 28)}>
-              <BarChart data={billionClub} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                <XAxis type="number" stroke="#71717a" label={{ value: "Years from IPO to $1B Revenue", position: "insideBottom", offset: -5, fill: "#71717a", fontSize: 12 }} />
-                <YAxis type="category" dataKey="ticker" stroke="#71717a" width={55} tick={{ fontSize: 10 }} />
-                <Tooltip contentStyle={tooltipStyle} content={({ payload }) => {
-                  if (!payload?.[0]) return null; const d = payload[0].payload;
-                  return (<div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm">
-                    <p className="text-white font-semibold">{d.ticker} — {d.company}</p>
-                    <p className="text-zinc-400 text-xs">{d.sector}</p>
-                    <p className="text-cyan-400 mt-1">IPO: {d.ipo_year} → $1B: {d.crossed_year} ({d.years_to_billion} years)</p>
-                  </div>);
-                }} />
-                <Bar dataKey="years_to_billion" radius={[0, 6, 6, 0]}>
-                  {billionClub.map((d, i) => (<Cell key={d.ticker} fill={i < 5 ? "#14b8a6" : i < 15 ? "#0ea5e9" : "#6366f1"} />))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {billionClub.map((d, i) => (
+                <div key={d.ticker} className="relative bg-zinc-800/60 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white font-bold text-sm">{d.ticker}</span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${i < 5 ? "bg-teal-500/20 text-teal-400" : i < 15 ? "bg-blue-500/20 text-blue-400" : "bg-indigo-500/20 text-indigo-400"}`}>
+                      {d.years_to_billion}yr{d.years_to_billion !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <p className="text-zinc-400 text-xs truncate">{d.company}</p>
+                  <div className="mt-2 w-full bg-zinc-700/30 rounded-full h-1.5">
+                    <div className="h-1.5 rounded-full transition-all" style={{
+                      width: `${Math.max(8, 100 - (d.years_to_billion / (billionClub[billionClub.length - 1]?.years_to_billion || 30)) * 100)}%`,
+                      backgroundColor: i < 5 ? "#14b8a6" : i < 15 ? "#0ea5e9" : "#6366f1",
+                    }} />
+                  </div>
+                  <p className="text-zinc-500 text-[10px] mt-1.5">IPO {d.ipo_year} → $1B by {d.crossed_year}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-6 mt-4 justify-center text-xs">
+              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-teal-500" />Fastest (top 5)</div>
+              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500" />Fast (6-15)</div>
+              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-indigo-500" />Rest</div>
+            </div>
           </div>
         </Section>
 
         {/* ═══ 10: STOCK RETURNS ═══ */}
-        <Section id="returns" number="10" title="The Scoreboard: Stock Performance"
+        <Section id="returns" number="09" title="The Scoreboard: Stock Performance"
           description="Total return from Jan 2020 to today. Captures the full pandemic cycle. The gap between winners and losers is staggering.">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <Callout stat={`+${returns[0]?.return_since_2020.toFixed(0)}%`} label={`${returns[0]?.ticker} — #1`} color="emerald" />
@@ -790,7 +730,7 @@ export default function Home() {
         </Section>
 
         {/* ═══ 11: HEATMAP ═══ */}
-        <Section id="heatmap" number="11" title="Valuation Heatmap"
+        <Section id="heatmap" number="10" title="Valuation Heatmap"
           description="Every company × every year. Cells colored by EV/Revenue multiple. Blue = cheap, yellow = moderate, red = expensive. The compression from 2021 to present is visible at a glance.">
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
             {/* Legend */}
@@ -832,7 +772,7 @@ export default function Home() {
         </Section>
 
         {/* ═══ 12: COMPANY COMPARISON ═══ */}
-        <Section id="compare" number="12" title="Company Comparison"
+        <Section id="compare" number="11" title="Company Comparison"
           description="Select up to 3 companies to compare side-by-side. See how their valuations tracked over time and how their fundamentals stack up.">
           <div className="flex flex-wrap gap-4 mb-6">
             {[{ val: comp1, set: setComp1, color: COMPARE_COLORS[0] },
@@ -895,17 +835,13 @@ export default function Home() {
         </Section>
 
         {/* ═══ 13: FULL TABLE ═══ */}
-        <Section id="table" number="13" title="Full Company Dataset"
-          description={`Every company for FY${selectedYear}. Search, sort, and download the raw data.`}>
+        <Section id="table" number="12" title="Full Company Dataset"
+          description={`Every company for FY${selectedYear}. Search and sort the raw data.`}>
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 overflow-x-auto">
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <input type="text" placeholder="Search ticker or company..." value={tableSearch}
                 onChange={(e) => setTableSearch(e.target.value)}
                 className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-4 py-2 w-64 placeholder-zinc-500" />
-              <button onClick={downloadCSV}
-                className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                Download CSV
-              </button>
               <span className="text-sm text-zinc-500">{tableData.length} companies</span>
             </div>
             <table className="w-full text-sm">
